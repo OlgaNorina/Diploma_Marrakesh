@@ -1,17 +1,33 @@
 package ru.netology.web.test;
 
+import com.codeborne.selenide.logevents.SelenideLogger;
+import io.qameta.allure.selenide.AllureSelenide;
 import lombok.val;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.netology.web.data.DataHelper;
+import ru.netology.web.data.SQLHelper;
 import ru.netology.web.page.CardPayment;
 
-import static com.codeborne.selenide.Condition.text;
+import java.sql.SQLException;
+
 import static com.codeborne.selenide.Selenide.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CardPaymentTest {
     private CardPayment cardPayment = new CardPayment();
+
+    @BeforeAll
+    static void setUpAll() {
+        SelenideLogger.addListener("allure", new AllureSelenide());
+    }
+
+    @AfterAll
+    static void tearDownAll() {
+        SelenideLogger.removeListener("allure");
+    }
 
     @BeforeEach
     void shouldOpen() {
@@ -19,10 +35,11 @@ class CardPaymentTest {
     }
 
     @Test
-    void shouldPayApprovedCardNamedInRus() {
+    void shouldPayApprovedCardNamedInRus() throws SQLException {
         val cardNumber = DataHelper.getInfoForPayApprovedCardNamedInRus();
         cardPayment.pageForDebitCard(cardNumber);
         cardPayment.checkApprovedMessage();
+        assertEquals(SQLHelper.getStatusPurchase(), "APPROVED");
     }
 
     @Test
@@ -79,5 +96,62 @@ class CardPaymentTest {
         val cardNumber = DataHelper.getInfoForPayApprovedOwnerLength();
         cardPayment.pageForDebitCard(cardNumber);
         assertEquals(DataHelper.getInfoForPayApprovedOwnerLength().owner.substring(50), cardPayment.checkLengthOwner());
+    }
+
+    @Test
+    void shouldPayApprovedOwnerSimbol() {
+        val cardNumber = DataHelper.getInfoForPayApprovedOwnerSimbol();
+        cardPayment.pageForDebitCard(cardNumber);
+        cardPayment.checkErrorMessageOwnerSimbol();
+    }
+
+    @Test
+    void shouldPayApprovedCardNotFull() {
+        val cardNumber = DataHelper.getInfoForPayApprovedCardNotFull();
+        cardPayment.pageForDebitCard(cardNumber);
+        cardPayment.checkErrorMessageCard();
+    }
+
+    @Test
+    void shouldPayApprovedCardYearExpired() {
+        val cardNumber = DataHelper.getInfoForPayApprovedCardYearExpired();
+        cardPayment.pageForDebitCard(cardNumber);
+        cardPayment.checkErrorMessageYearExpired();
+    }
+
+    @Test
+    void shouldPayApprovedCardExpiredMonth() {
+        val cardNumber = DataHelper.getInfoForPayApprovedCardExpiredMonth();
+        cardPayment.pageForDebitCard(cardNumber);
+        cardPayment.checkErrorMessageExpiredMonth();
+    }
+
+    @Test
+    void shouldPayNotApprovedCardAfterCloseDONTWORK() {
+        val cardNumber = DataHelper.getInfoForPayNotApprovedCardNamedInRus();
+        cardPayment.pageForDebitCard(cardNumber);
+        cardPayment.close();
+        cardPayment.checkApprovedMessage();
+    }
+
+    @Test
+    void shouldCreditPayApprovedCardNamedInRus() {
+        val cardNumber = DataHelper.getCreditInfoForPayApprovedCardNamedInRus();
+        cardPayment.pageForCreditCard(cardNumber);
+        cardPayment.checkApprovedMessage();
+    }
+
+    @Test
+    void shouldCreditInfoForPayDeclinedCard() {
+        val cardNumber = DataHelper.getCreditInfoForPayDeclinedCard();
+        cardPayment.pageForCreditCard(cardNumber);
+        cardPayment.checkDeclinedMessage();
+    }
+
+    @Test
+    void shouldCreditInfoForPayApprovedCardLongWaitDONTWORK() {
+        val cardNumber = DataHelper.getInfoForPayNotApprovedCardNamedInRus();
+        cardPayment.pageForDebitCard(cardNumber);
+        cardPayment.checkDeclinedMessageLongWait();
     }
 }

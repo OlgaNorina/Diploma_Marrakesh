@@ -77,7 +77,45 @@ public class DataHelper {
                 String.valueOf(fakerEng.number().numberBetween(100, 999)));
     }
 
+    public static AuthInfo getInfoForPayApprovedOwnerSimbol() {
+        return new AuthInfo("4444444444444441", String.valueOf("0" + calendar.get(Calendar.MONTH)),
+                String.valueOf(calendar.get(Calendar.YEAR) + 1).substring(2),
+                "_________________________________",
+                String.valueOf(fakerEng.number().numberBetween(100, 999)));
+    }
 
+    public static AuthInfo getInfoForPayApprovedCardNotFull() {
+        return new AuthInfo("444444444444", String.valueOf("0" + calendar.get(Calendar.MONTH)),
+                String.valueOf(calendar.get(Calendar.YEAR) + 1).substring(2), fakerRus.name().fullName(),
+                String.valueOf(fakerRus.number().numberBetween(100, 999)));
+    }
 
+    public static AuthInfo getInfoForPayApprovedCardYearExpired() {
+        return new AuthInfo("4444444444444441", String.valueOf("0" + calendar.get(Calendar.MONTH)),
+                String.valueOf(calendar.get(Calendar.YEAR) - 1).substring(2), fakerRus.name().fullName(),
+                String.valueOf(fakerRus.number().numberBetween(100, 999)));
+    }
 
+    public static AuthInfo getInfoForPayApprovedCardExpiredMonth() {
+        return new AuthInfo("4444444444444441", "01", "20", fakerRus.name().fullName(),
+                String.valueOf(fakerRus.number().numberBetween(100, 999)));
+    }
+
+    public static AuthInfo getInfoForPayNotApprovedCardNamedInRus() {
+        return new AuthInfo("4444444444446547", String.valueOf("0" + calendar.get(Calendar.MONTH)),
+                String.valueOf(calendar.get(Calendar.YEAR) + 1).substring(2), fakerRus.name().fullName(),
+                String.valueOf(fakerRus.number().numberBetween(100, 999)));
+    }
+
+    public static AuthInfo getCreditInfoForPayApprovedCardNamedInRus() {
+        return new AuthInfo("4444444444444441", String.valueOf("0" + calendar.get(Calendar.MONTH)),
+                String.valueOf(calendar.get(Calendar.YEAR) + 1).substring(2), fakerRus.name().fullName(),
+                String.valueOf(fakerRus.number().numberBetween(100, 999)));
+    }
+
+    public static AuthInfo getCreditInfoForPayDeclinedCard() {
+        return new AuthInfo("4444444444444442", String.valueOf("0" + calendar.get(Calendar.MONTH) + 1),
+                String.valueOf(calendar.get(Calendar.YEAR) + 1).substring(2), fakerEng.name().fullName(),
+                String.valueOf(fakerEng.number().numberBetween(100, 999)));
+    }
 }
