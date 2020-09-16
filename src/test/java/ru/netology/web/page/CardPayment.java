@@ -1,6 +1,5 @@
 package ru.netology.web.page;
 
-import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 import ru.netology.web.data.DataHelper;
 
@@ -47,7 +46,7 @@ public class CardPayment {
         buyTourInCredit.click();
     }
 
-    public CardPayment pageFieldInfo(DataHelper.AuthInfo info) {
+    public CardPayment pageFieldInfo(DataHelper.CardInfo info) {
         inputCardNumber.setValue(info.getCardNumber());
         inputMonth.setValue(info.getMonth());
         inputYear.setValue(info.getYear());

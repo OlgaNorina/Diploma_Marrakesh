@@ -12,9 +12,15 @@ import java.sql.SQLException;
 
 import static com.codeborne.selenide.Selenide.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class CardPaymentTest {
     private CardPayment cardPayment = new CardPayment();
+
+    private final static String statusAPPROVED = "APPROVED";
+    private final static String statusDECLINED = "DECLINED";
+    private final static String cardAPPROVED = "4444444444444441";
+    private final static String cardDECLINED = "4444444444444442";
 
     @BeforeAll
     static void setUpAll() {
@@ -38,123 +44,137 @@ class CardPaymentTest {
 
     @Test
     void shouldPayApprovedCardNamedInRus() throws SQLException {
-        val cardNumber = DataHelper.getInfoForPayApprovedCardNamedInRus();
+        val cardNumber = DataHelper.getCardInfo(cardAPPROVED, DataHelper.getMoth(),
+                DataHelper.getYear(1), DataHelper.getOwnerInRus(), DataHelper.getValidCvc());
         cardPayment.debitPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkApprovedMessage();
-        assertEquals(SQLHelper.getStatusFromPaymentEntity(), "APPROVED");
+        assertEquals(statusAPPROVED, SQLHelper.getStatusFromPaymentEntity());
         assertEquals(SQLHelper.getTransactionIdFromPaymentEntity(), SQLHelper.getPaymentIdFromOrderEntity());
     }
 
     @Test
     void shouldPayApprovedCardNamedInEng() throws SQLException {
-        val cardNumber = DataHelper.getInfoForPayApprovedCardNameInEng();
+        val cardNumber = DataHelper.getCardInfo(cardAPPROVED, DataHelper.getMoth(),
+                DataHelper.getYear(1), DataHelper.getOwnerInRus(), DataHelper.getValidCvc());
         cardPayment.debitPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkApprovedMessage();
-        assertEquals(SQLHelper.getStatusFromPaymentEntity(), "APPROVED");
+        assertEquals(statusAPPROVED, SQLHelper.getStatusFromPaymentEntity());
     }
 
     @Test
     void shouldPayDeclinedCard() throws SQLException {
-        val cardNumber = DataHelper.getInfoForPayDeclinedCard();
+        val cardNumber = DataHelper.getCardInfo(cardDECLINED, DataHelper.getMoth(),
+                DataHelper.getYear(1), DataHelper.getOwnerInEng(), DataHelper.getValidCvc());
         cardPayment.debitPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkDeclinedMessage();
-        assertEquals(SQLHelper.getStatusFromPaymentEntity(), "DECLINED");
+        assertEquals(statusDECLINED, SQLHelper.getStatusFromPaymentEntity());
     }
 
     @Test
     void shouldPayApprovedWithoutCardNumber() throws SQLException {
-        val cardNumber = DataHelper.getInfoForPayWithoutCardNumber();
+        val cardNumber = DataHelper.getCardInfo("", DataHelper.getMoth(), DataHelper.getYear(1),
+                DataHelper.getOwnerInEng(), DataHelper.getValidCvc());
         cardPayment.debitPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkErrorMessageCard();
-        assertEquals(SQLHelper.getStatusFromPaymentEntity(), null);
+        assertNull(SQLHelper.getStatusFromPaymentEntity());
     }
 
     @Test
     void shouldPayApprovedWithoutMonth() throws SQLException {
-        val cardNumber = DataHelper.getInfoForPayApprovedCardWithoutMonth();
+        val cardNumber = DataHelper.getCardInfo(cardAPPROVED, "",
+                DataHelper.getYear(1), DataHelper.getOwnerInEng(), DataHelper.getValidCvc());
         cardPayment.debitPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkErrorMessageMonth();
-        assertEquals(SQLHelper.getStatusFromPaymentEntity(), null);
+        assertNull(SQLHelper.getStatusFromPaymentEntity());
     }
 
     @Test
     void shouldPayApprovedWithoutYear() throws SQLException {
-        val cardNumber = DataHelper.getInfoForPayApprovedCardWithoutYear();
+        val cardNumber = DataHelper.getCardInfo(cardAPPROVED, DataHelper.getMoth(),
+                "", DataHelper.getOwnerInEng(), DataHelper.getValidCvc());
         cardPayment.debitPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkErrorMessageYear();
-        assertEquals(SQLHelper.getStatusFromPaymentEntity(), null);
+        assertNull(SQLHelper.getStatusFromPaymentEntity());
     }
 
     @Test
     void shouldPayApprovedWithoutOwner() throws SQLException {
-        val cardNumber = DataHelper.getInfoForPayApprovedCardWithoutOwner();
+        val cardNumber = DataHelper.getCardInfo(cardAPPROVED, DataHelper.getMoth(),
+                DataHelper.getYear(1), "", DataHelper.getValidCvc());
         cardPayment.debitPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkErrorMessageOwner();
-        assertEquals(SQLHelper.getStatusFromPaymentEntity(), null);
+        assertNull(SQLHelper.getStatusFromPaymentEntity());
     }
 
     @Test
     void shouldPayApprovedWithoutCVC() throws SQLException {
-        val cardNumber = DataHelper.getInfoForPayApprovedCardWithoutCVC();
+        val cardNumber = DataHelper.getCardInfo(cardAPPROVED, DataHelper.getMoth(),
+                DataHelper.getYear(1), DataHelper.getOwnerInEng(), "");
         cardPayment.debitPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkErrorMessageCVC();
-        assertEquals(SQLHelper.getStatusFromPaymentEntity(), null);
+        assertNull(SQLHelper.getStatusFromPaymentEntity());
     }
 
     @Test
     void shouldPayApprovedOwnerLength50() {
-        val cardNumber = DataHelper.getInfoForPayApprovedOwnerLength();
+        val cardNumber = DataHelper.getCardInfo(cardAPPROVED, DataHelper.getMoth(),
+                DataHelper.getYear(1), DataHelper.getOwnerLenght(), DataHelper.getValidCvc());
         cardPayment.debitPurchase();
         cardPayment.pageFieldInfo(cardNumber);
-        assertEquals(DataHelper.getInfoForPayApprovedOwnerLength().owner.substring(50), cardPayment.checkLengthOwner());
+        assertEquals(DataHelper.getOwnerLenght().substring(50), cardPayment.checkLengthOwner());
     }
 
     @Test
     void shouldPayApprovedOwnerSimbol() {
-        val cardNumber = DataHelper.getInfoForPayApprovedOwnerSimbol();
+        val cardNumber = DataHelper.getCardInfo(cardAPPROVED, DataHelper.getMoth(),
+                DataHelper.getYear(1), "_________________________________", DataHelper.getValidCvc());
         cardPayment.debitPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkErrorMessageOwnerSimbol();
     }
 
     @Test
-    void shouldPayApprovedCardNotFull() throws SQLException{
-        val cardNumber = DataHelper.getInfoForPayApprovedCardNotFull();
+    void shouldPayApprovedCardNotFull() throws SQLException {
+        val cardNumber = DataHelper.getCardInfo("444444444444", DataHelper.getMoth(),
+                DataHelper.getYear(1), DataHelper.getOwnerInEng(), DataHelper.getValidCvc());
         cardPayment.debitPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkErrorMessageCard();
-        assertEquals(SQLHelper.getStatusFromPaymentEntity(), null);
+        assertNull(SQLHelper.getStatusFromPaymentEntity());
     }
 
     @Test
-    void shouldPayApprovedCardYearExpired() throws SQLException{
-        val cardNumber = DataHelper.getInfoForPayApprovedCardYearExpired();
+    void shouldPayApprovedCardYearExpired() throws SQLException {
+        val cardNumber = DataHelper.getCardInfo(cardAPPROVED, DataHelper.getMoth(),
+                DataHelper.getYear(-1), DataHelper.getOwnerInEng(), DataHelper.getValidCvc());
         cardPayment.debitPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkErrorMessageYearExpired();
-        assertEquals(SQLHelper.getStatusFromPaymentEntity(), null);
+        assertNull(SQLHelper.getStatusFromPaymentEntity());
     }
 
     @Test
     void shouldPayApprovedCardExpiredMonth() throws SQLException {
-        val cardNumber = DataHelper.getInfoForPayApprovedCardExpiredMonth();
+        val cardNumber = DataHelper.getCardInfo(cardAPPROVED, "01",
+                DataHelper.getYear(0), DataHelper.getOwnerInEng(), DataHelper.getValidCvc());
         cardPayment.debitPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkErrorMessageExpiredMonth();
-        assertEquals(SQLHelper.getStatusFromPaymentEntity(), null);
+        assertNull(SQLHelper.getStatusFromPaymentEntity());
     }
 
     @Test
     void shouldPayNotApprovedCardAfterClose() {
-        val cardNumber = DataHelper.getInfoForPayNotApprovedCardNamedInRus();
+        val cardNumber = DataHelper.getCardInfo("4444444444446547", DataHelper.getMoth(),
+                DataHelper.getYear(1), DataHelper.getOwnerInRus(), DataHelper.getValidCvc());
         cardPayment.debitPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.close();
@@ -163,29 +183,32 @@ class CardPaymentTest {
 
     @Test
     void shouldCreditPayApprovedCardNamedInRus() throws SQLException {
-        val cardNumber = DataHelper.getInfoForPayApprovedCardNamedInRus();
+        val cardNumber = DataHelper.getCardInfo(cardAPPROVED, DataHelper.getMoth(),
+                DataHelper.getYear(1), DataHelper.getOwnerInRus(), DataHelper.getValidCvc());
         cardPayment.creditPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkApprovedMessage();
-        assertEquals(SQLHelper.getStatusFromCreditRequestEntity(), "APPROVED");
+        assertEquals(statusAPPROVED, SQLHelper.getStatusFromCreditRequestEntity());
         assertEquals(SQLHelper.getBankIdFromCreditRequestEntity(), SQLHelper.getCreditIdFromOrderEntity());
     }
 
     @Test
     void shouldCreditInfoForPayDeclinedCard() throws SQLException {
-        val cardNumber = DataHelper.getInfoForPayApprovedCardNameInEng();
+        val cardNumber = DataHelper.getCardInfo(cardDECLINED, DataHelper.getMoth(),
+                DataHelper.getYear(1), DataHelper.getOwnerInRus(), DataHelper.getValidCvc());
         cardPayment.creditPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkDeclinedMessage();
-        assertEquals(SQLHelper.getStatusFromCreditRequestEntity(), "DECLINED");
+        assertEquals(statusDECLINED, SQLHelper.getStatusFromCreditRequestEntity());
     }
 
     @Test
     void shouldCreditInfoForPayInvalidCVC() throws SQLException {
-        val cardNumber = DataHelper.getInfoForPayApprovedCardInvalidCVC();
+        val cardNumber = DataHelper.getCardInfo(cardAPPROVED, DataHelper.getMoth(),
+                DataHelper.getYear(1), DataHelper.getOwnerInEng(), "000");
         cardPayment.creditPurchase();
         cardPayment.pageFieldInfo(cardNumber);
         cardPayment.checkErrorMessageCVC();
-        assertEquals(SQLHelper.getStatusFromCreditRequestEntity(), null);
+        assertNull(SQLHelper.getStatusFromCreditRequestEntity());
     }
 }

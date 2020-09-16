@@ -13,65 +13,38 @@ public class SQLHelper {
     private static final String user = "app";
     private static final String password = "pass";
 
+    public static String getScalarFromTable(String column, String tableName) throws SQLException {
+        QueryRunner runner = new QueryRunner();
+        try (val conn = DriverManager.getConnection(url, user, password)
+        ) {
+            val info = "SELECT " + column + " FROM " + tableName + " ORDER BY created DESC LIMIT 1;";
+            val scalar = runner.query(conn, info, new ScalarHandler<String>());
+            return scalar;
+        }
+    }
+
     public static String getStatusFromPaymentEntity() throws SQLException {
-        QueryRunner runner = new QueryRunner();
-        try (val conn = DriverManager.getConnection(url, user, password)
-        ) {
-            val selectStatus = "SELECT status FROM payment_entity ORDER BY created DESC LIMIT 1;";
-            val status = runner.query(conn, selectStatus, new ScalarHandler<String>());
-            return status;
-        }
+        return getScalarFromTable("status", "payment_entity");
     }
 
-     public static String getTransactionIdFromPaymentEntity() throws SQLException {
-        QueryRunner runner = new QueryRunner();
-        try (val conn = DriverManager.getConnection(url, user, password)
-        ) {
-            val selectStatus = "SELECT transaction_id FROM payment_entity ORDER BY created DESC LIMIT 1;";
-            val transaction_id = runner.query(conn, selectStatus, new ScalarHandler<String>());
-            return transaction_id;
-        }
+    public static String getTransactionIdFromPaymentEntity() throws SQLException {
+        return getScalarFromTable("transaction_id", "payment_entity");
     }
-
-     public static String getBankIdFromCreditRequestEntity() throws SQLException {
-        QueryRunner runner = new QueryRunner();
-        try (val conn = DriverManager.getConnection(url, user, password)
-        ) {
-            val selectStatus = "SELECT bank_id FROM credit_request_entity ORDER BY created DESC LIMIT 1;";
-            val bank_id = runner.query(conn, selectStatus, new ScalarHandler<String>());
-            return bank_id;
-        }
-    }
-
 
     public static String getPaymentIdFromOrderEntity() throws SQLException {
-        QueryRunner runner = new QueryRunner();
-        try (val conn = DriverManager.getConnection(url, user, password)
-        ) {
-            val selectOrderEntity = "SELECT payment_id FROM order_entity  LIMIT 1;";
-            val payment_id = runner.query(conn, selectOrderEntity, new ScalarHandler<String>());
-            return payment_id;
-        }
+        return getScalarFromTable("payment_id", "order_entity");
     }
 
     public static String getCreditIdFromOrderEntity() throws SQLException {
-        QueryRunner runner = new QueryRunner();
-        try (val conn = DriverManager.getConnection(url, user, password)
-        ) {
-            val selectOrderEntity = "SELECT credit_id FROM order_entity  LIMIT 1;";
-            val credit_id = runner.query(conn, selectOrderEntity, new ScalarHandler<String>());
-            return credit_id;
-        }
+        return getScalarFromTable("credit_id", "order_entity");
     }
 
     public static String getStatusFromCreditRequestEntity() throws SQLException {
-        QueryRunner runner = new QueryRunner();
-        try (val conn = DriverManager.getConnection(url, user, password)
-        ) {
-            val selectStatus = "SELECT status FROM credit_request_entity ORDER BY created DESC LIMIT 1;";
-            val status = runner.query(conn, selectStatus, new ScalarHandler<String>());
-            return status;
-        }
+        return getScalarFromTable("status", "credit_request_entity");
+    }
+
+    public static String getBankIdFromCreditRequestEntity() throws SQLException {
+        return getScalarFromTable("bank_id", "credit_request_entity");
     }
 
     public static void clearDBTables() {
